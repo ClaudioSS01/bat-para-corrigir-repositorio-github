@@ -1,12 +1,23 @@
 @echo off
-set /p item_name=Digite o nome do arquivo ou pasta a ser ignorado e excluído: 
 
-REM Verifica se o item fornecido é um arquivo ou pasta
-IF EXIST "%item_name%" (
-  REM Exclui a pasta ou arquivo do histórico de commits
+:loop
+set /p item_name=Digite o nome do arquivo ou pasta a ser ignorado e excluído (ou pressione Enter para sair): 
+
+REM Verifica se o usuário pressionou Enter sem digitar um nome
+IF "%item_name%"=="" (
+  exit /b
+)
+
+REM Verifica se o item fornecido existe
+IF NOT EXIST "%item_name%" (
+  echo O arquivo ou pasta "%item_name%" não existe. Por favor, tente novamente.
+  goto loop
+)
+
+REM Exclui a pasta ou arquivo do histórico de commits
+IF EXIST "%item_name%\." (
   git rm -r --cached "%item_name%"
 ) ELSE (
-  REM Exclui o arquivo do histórico de commits
   git rm --cached "%item_name%"
 )
 
@@ -19,4 +30,4 @@ git commit -m "Remover %item_name%"
 REM Atualiza o repositório remoto
 git push origin main --force
 
-pause
+goto loop
